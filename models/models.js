@@ -6,6 +6,6 @@ const UserSchema = new mongoose.Schema({
     email: String,
 }, { collection: 'users' },)
 
-const User = mongoose.model("User", UserSchema,  'movieManager')
+const User = mongoose.model("User", UserSchema)
 
 module.exports = User
