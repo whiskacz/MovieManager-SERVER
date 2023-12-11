@@ -48,6 +48,36 @@ app.post("/create", async (request, response) => {
     } catch (error) {
         response.status(500).json({ message: "Server error" });
     }
+
+    app.post("/moviesEdit", async (request, response) => {
+        const { userId, action, movieId } = request.body;
+    
+        try {
+            // Znajdź użytkownika po ID
+            const foundUser = await userModel.findById(userId);
+    
+            if (foundUser) {
+                if (action === "add") {
+                    // Dodaj identyfikator filmu do listy filmów użytkownika
+                    foundUser.movies.push(movieId);
+                    response.status(200).json({ message: "Movie added to user's collection successfully" });
+                } else if (action === "remove") {
+                    // Usuń identyfikator filmu z listy filmów użytkownika
+                    foundUser.movies = foundUser.movies.filter(id => id !== movieId);
+                    response.status(200).json({ message: "Movie removed from user's collection successfully" });
+                } else {
+                    response.status(400).json({ message: "Invalid action" });
+                }
+    
+                // Zapisz zmiany w bazie danych
+                await foundUser.save();
+            } else {
+                response.status(404).json({ message: "User not found" });
+            }
+        } catch (error) {
+            response.status(500).json({ message: "Server error" });
+        }
+    });
 });
 
 module.exports = app
