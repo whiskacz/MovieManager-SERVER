@@ -51,34 +51,46 @@ try {
 
 });
 
-app.post("/moviesEdit", async (request, response) => {
-    const { user, action, movieId } = request.body;
+app.post('/moviesEdit', async (request, response) => {
+    const { user, action, movieData } = request.body;
 
     try {
-       
         const foundUser = await userModel.findOne({ user });
 
         if (foundUser) {
-            if (action === "add") {
-                // Dodaj identyfikator filmu do listy filmów użytkownika
-                foundUser.movies.push(movieId);
-                response.status(200).json({ message: "Movie added to user's collection successfully" });
-            } else if (action === "remove") {
-                // Usuń identyfikator filmu z listy filmów użytkownika
-                foundUser.movies = foundUser.movies.filter(id => id !== movieId);
-                response.status(200).json({ message: "Movie removed from user's collection successfully" });
+            if (action === 'add') {
+                // Dodawanie movieData do tablicy movies
+                foundUser.movies.push(movieData);
+                await foundUser.save();
+                response.status(200).json({ message: 'Movie added to user\'s collection successfully' });
+            } else if (action === 'remove') {
+                // Usuwanie filmu z tablicy movies na podstawie identyfikatora filmu
+                const { id } = movieData;
+                foundUser.movies = foundUser.movies.filter(movie => movie.id != id); // Zmiana tutaj
+                await foundUser.save();
+                response.status(200).json({ message: 'Movie removed from user\'s collection successfully' });
             } else {
-                response.status(400).json({ message: "Invalid action" });
+                response.status(400).json({ message: 'Invalid action' });
             }
-
-            // Zapisz zmiany w bazie danych
-            await foundUser.save();
         } else {
-            response.status(404).json({ message: "User not found" });
+            response.status(404).json({ message: 'User not found' });
         }
     } catch (error) {
-        response.status(500).json({ message: "Server error" });
+        response.status(500).json({ message: 'Server error' });
     }
 });
+
+app.get('/movies', async (request, response) => {
+    try {
+        // Pobranie wszystkich filmów z bazy danych
+        const allMovies = await userModel.find({}, 'movies');
+        const moviesList = allMovies.map(user => user.movies).flat(); // Pobranie listy filmów ze wszystkich użytkowników
+
+        response.status(200).json(moviesList);
+    } catch (error) {
+        response.status(500).json({ message: 'Server error' });
+    }
+});
+
 
 module.exports = app
