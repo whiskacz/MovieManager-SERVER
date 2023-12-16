@@ -59,14 +59,17 @@ app.post('/moviesEdit', async (request, response) => {
 
         if (foundUser) {
             if (action === 'add') {
-                // Dodawanie movieData do tablicy movies
-                foundUser.movies.push(movieData);
-                await foundUser.save();
-                response.status(200).json({ message: 'Movie added to user\'s collection successfully' });
+                const existingMovie = foundUser.movies.find(movie => movie.title === movieData.title);
+                if (existingMovie) {
+                    response.status(400).json({ message: 'Movie with the same title already exists in user\'s collection' });
+                } else {
+                    foundUser.movies.push(movieData);
+                    await foundUser.save();
+                    response.status(200).json({ message: 'Movie added to user\'s collection successfully' });
+                }
             } else if (action === 'remove') {
-                // Usuwanie filmu z tablicy movies na podstawie identyfikatora filmu
                 const { id } = movieData;
-                foundUser.movies = foundUser.movies.filter(movie => movie.id != id); // Zmiana tutaj
+                foundUser.movies = foundUser.movies.filter(movie => movie.id != id);
                 await foundUser.save();
                 response.status(200).json({ message: 'Movie removed from user\'s collection successfully' });
             } else {
@@ -79,6 +82,8 @@ app.post('/moviesEdit', async (request, response) => {
         response.status(500).json({ message: 'Server error' });
     }
 });
+
+
 
 app.get('/movies', async (request, response) => {
     try {
