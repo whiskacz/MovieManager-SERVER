@@ -7,7 +7,9 @@ const MovieSchema = new mongoose.Schema({
     poster_path: String,
     homepage: String,
     overview: String,
-    release_date: String
+    release_date: String,
+    vote_average: Number,
+    vote_count: Number, 
 })
 
 const UserSchema = new mongoose.Schema({

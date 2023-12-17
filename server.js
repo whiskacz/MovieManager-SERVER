@@ -9,8 +9,7 @@ const port = 5000
 app.use(cors())
 app.use(express.json())
 
-mongoose.connect(`${loginData}`,
-)
+mongoose.connect(`${loginData}`,)
 
   const db = mongoose.connection;
   db.on("error", console.error.bind(console, "connection error: "));
